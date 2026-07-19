@@ -1,8 +1,8 @@
 import express from "express";
-const router = express.Router();
+const movieRouter = express.Router();
 
-router.get("/hello", (req, res) => {
-  res.json({ message: "Hello, World!" });
+movieRouter.get("/", (req, res) => {
+  res.json({ message: "Hello,Welcome To Movies World!" });
 });
 
-export default router;
+export default movieRouter;
