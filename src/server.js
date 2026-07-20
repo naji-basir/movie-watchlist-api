@@ -1,17 +1,19 @@
 import { config } from "dotenv";
+config(); // load env vars before anything else uses them
 import express from "express";
 import { connetDB, disconnetDB } from "./config/db.js";
+import authRouter from "./routes/auth.routes.js";
 import movieRouter from "./routes/movie.routes.js";
-
-config(); // load env vars before anything else uses them
 
 const app = express();
 app.use(express.json()); // read the json iknside body
-const PORT = process.env.PORT || 5001;
+app.use(express.urlencoded({ extended: true }));
 
 // ROUTES
 app.use("/movies", movieRouter);
+app.use("/auth", authRouter);
 
+const PORT = process.env.PORT || 5001;
 let server;
 
 async function startServer() {
