@@ -2,6 +2,16 @@ import bcrypt from "bcryptjs";
 import { prisma } from "../config/db";
 import { generateToken } from "../utils/jwt";
 
+// helper
+const setCookie = async (res, token) => {
+  res.cookie("jwt", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 1000 * 60 * 60 * 24 * 7,
+  });
+};
+
 export const register = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -24,6 +34,7 @@ export const register = async (req, res) => {
 
   //generate token
   const token = generateToken(newUser.id);
+  setCookie(res, token);
 
   return res.status(201).json({
     status: "success",
@@ -49,6 +60,8 @@ export const login = async (req, res) => {
   }
 
   const token = generateToken(user.id);
+  setCookie(res, token);
+
   return res.status(200).json({
     message: "Login successful",
     data: { user: { id: user.id, email } },
