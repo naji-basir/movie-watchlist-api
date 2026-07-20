@@ -23,7 +23,7 @@ model Movie {
   title          String
   overview       String?
   releaseYear    Int
-  genres       String[]        @default([])
+  genres         String[]        @default([])
   runtime        Int?
   posterUrl      String?
   createdBy      String
@@ -43,6 +43,8 @@ model WatchListItem {
   updatedAt DateTime        @updatedAt
   movie     Movie           @relation(fields: [movieId], references: [id], onDelete: Cascade)
   user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, movieId])
 }
 
 enum WatchListStatus {

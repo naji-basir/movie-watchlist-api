@@ -9,6 +9,8 @@ import { connectDB, disconnectDB } from "./config/db.js";
 import globalErrorHandler from "./middleware/errorHandler.js";
 import authRoutes from "./routes/auth.routes.js";
 import movieRoutes from "./routes/movie.routes.js";
+import watchlistRoutes from "./routes/watchlist.routes.js";
+
 import AppError from "./utils/AppError.js";
 
 const app = express();
@@ -24,8 +26,9 @@ if (process.env.NODE_ENV === "development") {
 }
 
 // --- Routes ---
-app.use("/movies", movieRoutes);
-app.use("/auth", authRoutes);
+app.use("/api/v1/movies", movieRoutes);
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/watchlist", watchlistRoutes);
 
 // Catches any request that didn't match a route above.
 app.use((req, res, next) => {

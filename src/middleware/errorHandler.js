@@ -44,18 +44,19 @@ const sendErrorProd = (err, res) => {
 };
 
 const globalErrorHandler = (err, req, res, next) => {
-  err.statusCode = err.statusCode || 500;
-  err.status = err.status || "error";
+  let error = err;
+
+  if (error.code && error.code.startsWith("P"))
+    error = handlePrismaKnownError(error);
+  if (error.name === "JsonWebTokenError") error = handleJWTError();
+  if (error.name === "TokenExpiredError") error = handleJWTExpiredError();
+
+  error.statusCode = error.statusCode || 500;
+  error.status = error.status || "error";
 
   if (process.env.NODE_ENV === "development") {
-    sendErrorDev(err, res);
+    sendErrorDev(error, res);
   } else {
-    let error = err;
-    if (error.code && error.code.startsWith("P"))
-      error = handlePrismaKnownError(error);
-    if (error.name === "JsonWebTokenError") error = handleJWTError();
-    if (error.name === "TokenExpiredError") error = handleJWTExpiredError();
-
     sendErrorProd(error, res);
   }
 };
