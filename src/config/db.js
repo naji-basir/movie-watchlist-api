@@ -1,7 +1,11 @@
-import { PrismaPg } from "@prisma/adapter-pg";
+import "dotenv/config"; // must be the very first line in this file
+
 import { PrismaClient } from "../generated/prisma/client";
-const connectionString = `${process.env.DATABASE_URL}`;
-const adapter = new PrismaPg({ connectionString });
+import { PrismaNeon } from "@prisma/adapter-neon";
+
+const adapter = new PrismaNeon({
+  connectionString: process.env.DATABASE_URL,
+});
 
 const prisma = new PrismaClient({
   adapter,
