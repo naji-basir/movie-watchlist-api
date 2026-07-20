@@ -1,14 +1,14 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "../config/db";
+import { generateToken } from "../utils/jwt";
 
 export const register = async (req, res) => {
   const { name, email, password } = req.body;
 
   //check if the user already exist
-  const userExist = await prisma.user.findUnique({ where: { email } });
-  console.log(userExist);
+  const user = await prisma.user.findUnique({ where: { email } });
 
-  if (userExist)
+  if (user)
     return res
       .status(400)
       .json({ error: "User already exist with this email." });
@@ -22,8 +22,36 @@ export const register = async (req, res) => {
     data: { name, email, password: hash },
   });
 
-  res.status(201).json({
+  //generate token
+  const token = generateToken(newUser.id);
+
+  return res.status(201).json({
     status: "success",
     data: { user: { id: newUser.id, name, email } },
+    token,
+  });
+};
+
+export const login = async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await prisma.user.findUnique({ where: { email } });
+
+  if (!user) {
+    return res.status(401).json({ error: "Invalid email or password." });
+  }
+
+  //varify password
+  const isValidPassowd = await bcrypt.compare(password, user.password);
+
+  if (!isValidPassowd) {
+    return res.status(401).json({ error: "Invalid email or password." });
+  }
+
+  const token = generateToken(user.id);
+  return res.status(200).json({
+    message: "Login successful",
+    data: { user: { id: user.id, email } },
+    token,
   });
 };
