@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "../config/db";
 import { generateToken } from "../utils/jwt";
 import catchAsync from "../utils/catchAsync";
+import AppError from "../utils/AppError";
 
 // helper
 const setCookie = async (res, token) => {
@@ -19,11 +20,9 @@ export const register = catchAsync(async (req, res) => {
   //check if the user already exist
   const user = await prisma.user.findUnique({ where: { email } });
 
-  if (user)
-    return res
-      .status(400)
-      .json({ error: "User already exist with this email." });
-
+  if (user) {
+    throw new AppError("User already exists with this email.", 400);
+  }
   // hash the password
   const salt = await bcrypt.genSalt(10);
   const hash = await bcrypt.hash(password, salt);
@@ -50,14 +49,14 @@ export const login = catchAsync(async (req, res) => {
   const user = await prisma.user.findUnique({ where: { email } });
 
   if (!user) {
-    return res.status(401).json({ error: "Invalid email or password." });
+    throw new AppError("Invalid email or password.", 401);
   }
 
   //varify password
-  const isValidPassowd = await bcrypt.compare(password, user.password);
+  const isValidPassword = await bcrypt.compare(password, user.password);
 
-  if (!isValidPassowd) {
-    return res.status(401).json({ error: "Invalid email or password." });
+  if (!isValidPassword) {
+    throw new AppError("Invalid email or password.", 401);
   }
 
   const token = generateToken(user.id);
