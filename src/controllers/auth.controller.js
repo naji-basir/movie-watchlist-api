@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "../config/db";
 import { generateToken } from "../utils/jwt";
+import catchAsync from "../utils/catchAsync";
 
 // helper
 const setCookie = async (res, token) => {
@@ -12,7 +13,7 @@ const setCookie = async (res, token) => {
   });
 };
 
-export const register = async (req, res) => {
+export const register = catchAsync(async (req, res) => {
   const { name, email, password } = req.body;
 
   //check if the user already exist
@@ -41,9 +42,9 @@ export const register = async (req, res) => {
     data: { user: { id: newUser.id, name, email } },
     token,
   });
-};
+});
 
-export const login = async (req, res) => {
+export const login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
 
   const user = await prisma.user.findUnique({ where: { email } });
@@ -63,8 +64,20 @@ export const login = async (req, res) => {
   setCookie(res, token);
 
   return res.status(200).json({
+    status: "success",
     message: "Login successful",
     data: { user: { id: user.id, email } },
     token,
   });
+});
+
+export const logout = (req, res) => {
+  res.cookie("jwt", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    expires: new Date(0),
+  });
+
+  res.status(200).json({ status: "success", message: "Logout successfuly." });
 };

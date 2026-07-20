@@ -11,11 +11,11 @@ const prisma = new PrismaClient({
   adapter,
   log:
     process.env.NODE_ENV === "development"
-      ? ["query", "error", "warn"]
+      ? ["error", "warn", "info"]
       : ["error"],
 });
 
-const connetDB = async () => {
+const connectDB = async () => {
   try {
     await prisma.$connect();
     console.log("DB connected via Prisma.");
@@ -25,8 +25,8 @@ const connetDB = async () => {
   }
 };
 
-const disconnetDB = async () => {
+const disconnectDB = async () => {
   await prisma.$disconnect();
 };
 
-export { prisma, connetDB, disconnetDB };
+export { prisma, connectDB, disconnectDB };

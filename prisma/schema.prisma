@@ -23,7 +23,7 @@ model Movie {
   title          String
   overview       String?
   releaseYear    Int
-  generes        String[]        @default([])
+  genres       String[]        @default([])
   runtime        Int?
   posterUrl      String?
   createdBy      String
