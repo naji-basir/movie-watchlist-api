@@ -1,62 +1,90 @@
 import { config } from "dotenv";
-config(); // load env vars before anything else uses them
+config(); // Must run before any other import touches process.env
+
+import cookieParser from "cookie-parser";
 import express from "express";
-import { connetDB, disconnetDB } from "./config/db.js";
-import authRouter from "./routes/auth.routes.js";
-import movieRouter from "./routes/movie.routes.js";
+import helmet from "helmet";
+import morgan from "morgan";
+import { connectDB, disconnectDB } from "./config/db.js";
+import globalErrorHandler from "./middleware/errorHandler.js";
+import authRoutes from "./routes/auth.routes.js";
+import movieRoutes from "./routes/movie.routes.js";
+import AppError from "./utils/AppError.js";
 
 const app = express();
-app.use(express.json()); // read the json iknside body
-app.use(express.urlencoded({ extended: true }));
 
-// ROUTES
-app.use("/movies", movieRouter);
-app.use("/auth", authRouter);
+// --- Global middleware ---
+app.use(helmet()); // sets secure HTTP headers (XSS, sniffing, etc.)
+app.use(express.json({ limit: "10kb" })); // parses JSON request bodies
+app.use(express.urlencoded({ extended: true, limit: "10kb" })); // parses form-encoded bodies
+app.use(cookieParser()); // populates req.cookies, needed to read the jwt cookie in auth middleware
 
-const PORT = process.env.PORT || 5001;
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("tiny"));
+}
+
+// --- Routes ---
+app.use("/movies", movieRoutes);
+app.use("/auth", authRoutes);
+
+// Catches any request that didn't match a route above.
+app.use((req, res, next) => {
+  next(new AppError(`Route ${req.originalUrl} not found.`, 404));
+});
+
+app.use(globalErrorHandler);
+
+const PORT = process.env.PORT || 5002;
 let server;
 
 async function startServer() {
   try {
-    await connetDB();
+    await connectDB();
     server = app.listen(PORT, () => {
       console.log(`Server running on PORT ${PORT}.`);
     });
   } catch (err) {
     console.error("Failed to start server:", err);
-    await disconnetDB();
+    await disconnectDB();
     process.exit(1);
   }
 }
 
+// Closes the HTTP server (letting in-flight requests finish) before closing the DB and exiting, rather than killing the process immediately.
 async function shutdown(signal) {
   console.log(`\n${signal} received. Shutting down gracefully...`);
   if (server) {
     server.close(async () => {
       console.log("HTTP server closed.");
-      await disconnetDB();
+      await disconnectDB();
       console.log("DB connection closed.");
-      process.exit(0); // exit without error
+      process.exit(0);
     });
   } else {
-    await disconnetDB();
+    await disconnectDB();
     process.exit(0);
   }
 }
 
-process.on("SIGINT", () => shutdown("SIGINT")); // Ctrl+C
-process.on("SIGTERM", () => shutdown("SIGTERM")); // docker, kubernates stoop the server
+process.on("SIGINT", () => shutdown("SIGINT")); // Ctrl+C locally
+process.on("SIGTERM", () => shutdown("SIGTERM")); // sent by Docker/Kubernetes/hosting platforms on stop
 
-process.on("unhandledRejection", async (reason) => {
+process.on("unhandledRejection", (reason) => {
   console.error("Unhandled Rejection:", reason);
-  await disconnetDB();
-  process.exit(1);
+  if (server) {
+    server.close(() => process.exit(1));
+  } else {
+    process.exit(1);
+  }
 });
 
-process.on("uncaughtException", async (err) => {
+process.on("uncaughtException", (err) => {
   console.error("Uncaught Exception:", err);
-  await disconnetDB();
-  process.exit(1);
+  if (server) {
+    server.close(() => process.exit(1));
+  } else {
+    process.exit(1);
+  }
 });
 
 startServer();
