@@ -1,19 +1,24 @@
 import { config } from "dotenv";
 config(); // Must run before any other import touches process.env
+import express, {
+  type Express,
+  type NextFunction,
+  type Request,
+  type Response,
+} from "express";
 
-import cookieParser from "cookie-parser";
-import express from "express";
 import helmet from "helmet";
+import { connectDB, disconnectDB } from "./config/db.ts";
 import morgan from "morgan";
-import { connectDB, disconnectDB } from "./config/db.js";
-import globalErrorHandler from "./middleware/errorHandler.js";
-import authRoutes from "./routes/auth.routes.js";
-import movieRoutes from "./routes/movie.routes.js";
-import watchlistRoutes from "./routes/watchlist.routes.js";
+import cookieParser from "cookie-parser";
+import globalErrorHandler from "./middleware/errorHandler.ts";
+import authRoutes from "./routes/auth.routes.ts";
+import movieRoutes from "./routes/movie.routes.ts";
+import watchlistRoutes from "./routes/watchlist.routes.ts";
 
-import AppError from "./utils/AppError.js";
+import AppError from "./utils/AppError.ts";
 
-const app = express();
+const app: Express = express();
 
 // --- Global middleware ---
 app.use(helmet()); // sets secure HTTP headers (XSS, sniffing, etc.)
@@ -31,14 +36,14 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/watchlist", watchlistRoutes);
 
 // Catches any request that didn't match a route above.
-app.use((req, res, next) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
   next(new AppError(`Route ${req.originalUrl} not found.`, 404));
 });
 
 app.use(globalErrorHandler);
 
 const PORT = process.env.PORT || 5002;
-let server;
+let server: any;
 
 async function startServer() {
   try {
@@ -54,7 +59,7 @@ async function startServer() {
 }
 
 // Closes the HTTP server (letting in-flight requests finish) before closing the DB and exiting, rather than killing the process immediately.
-async function shutdown(signal) {
+async function shutdown(signal: any) {
   console.log(`\n${signal} received. Shutting down gracefully...`);
   if (server) {
     server.close(async () => {

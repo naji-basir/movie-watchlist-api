@@ -5,7 +5,11 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --exec tsx src/server.js"
+    "dev": "nodemon --exec tsx src/app.ts",
+    "build": "tsc",
+    "start": "node dist/app.js",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix"
   },
   "keywords": [],
   "author": "",
@@ -32,11 +36,18 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^26.1.1",
     "eslint": "^10.7.0",
     "globals": "^17.7.0",
     "morgan": "^1.11.0",
     "nodemon": "^3.1.14",
     "prisma": "^7.8.0",
-    "tsx": "^4.23.1"
+    "tsx": "^4.23.1",
+    "typescript": "^7.0.2",
+    "typescript-eslint": "^8.64.0"
   }
 }

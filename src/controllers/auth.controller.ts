@@ -1,11 +1,12 @@
 import bcrypt from "bcryptjs";
-import { prisma } from "../config/db";
-import { generateToken } from "../utils/jwt";
-import catchAsync from "../utils/catchAsync";
-import AppError from "../utils/AppError";
+import { prisma } from "../config/db.ts";
+import { generateToken } from "../utils/jwt.ts";
+import catchAsync from "../utils/catchAsync.ts";
+import AppError from "../utils/AppError.ts";
+import type { Request, Response } from "express";
 
 // helper
-const setCookie = async (res, token) => {
+const setCookie = async (res: Response, token: string) => {
   res.cookie("jwt", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -14,7 +15,7 @@ const setCookie = async (res, token) => {
   });
 };
 
-export const register = catchAsync(async (req, res) => {
+export const register = catchAsync(async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
 
   //check if the user already exist
@@ -43,7 +44,7 @@ export const register = catchAsync(async (req, res) => {
   });
 });
 
-export const login = catchAsync(async (req, res) => {
+export const login = catchAsync(async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   const user = await prisma.user.findUnique({ where: { email } });
@@ -70,7 +71,7 @@ export const login = catchAsync(async (req, res) => {
   });
 });
 
-export const logout = (req, res) => {
+export const logout = (req: Request, res: Response) => {
   res.cookie("jwt", "", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
