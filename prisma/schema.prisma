@@ -13,6 +13,7 @@ model User {
   email          String          @unique
   password       String
   createdAt      DateTime        @default(now())
+  role           Role            @default(USER)
   movies         Movie[]         @relation("MovieCreator")
   watchListItems WatchListItem[]
 }
@@ -22,11 +23,11 @@ model Movie {
   title          String
   overview       String?
   releaseYear    Int
-  genres         String[]        @default([])
   runtime        Int?
   posterUrl      String?
   createdBy      String
-  CreatedAt      DateTime        @default(now())
+  genres         String[]        @default([])
+  createdAt      DateTime        @default(now())
   creator        User            @relation("MovieCreator", fields: [createdBy], references: [id], onDelete: Cascade)
   watchListItems WatchListItem[]
 }
@@ -48,7 +49,12 @@ model WatchListItem {
 
 enum WatchListStatus {
   PLANNED
-  WATCHNG
+  WATCHING
   COMPLETED
   DROPPED
+}
+
+enum Role {
+  USER
+  ADMIN
 }
