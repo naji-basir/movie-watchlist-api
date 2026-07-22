@@ -3,6 +3,7 @@ import "dotenv/config"; // must be the very first line in this file
 // import { PrismaClient } from "../generated/prisma/client";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "../generated/prisma/client.ts";
+import { logger } from "../utils/logger.ts";
 
 const adapter = new PrismaNeon({
   connectionString: process.env.DATABASE_URL,
@@ -19,9 +20,9 @@ const prisma = new PrismaClient({
 const connectDB = async () => {
   try {
     await prisma.$connect();
-    console.log("DB connected via Prisma.");
+    logger.info("DB connected via Prisma.");
   } catch (error: any) {
-    console.error(`Database connection error: ${error.message}`);
+    logger.error(error, "Database connection error");
     process.exit(1);
   }
 };
