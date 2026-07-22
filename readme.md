@@ -19,6 +19,7 @@ This isn't a tutorial clone — it started as a course project and was deliberat
 | Validation      | Zod 4                                                            |
 | Auth            | JWT (httpOnly cookies) + bcryptjs                                |
 | Package manager | pnpm                                                             |
+|Cloud            | Neon                                                             |
 
 **Why `noEmit: true`?** TypeScript is run directly via `tsx` (Node's native type-stripping in dev, and in prod alike) rather than pre-compiled — a deliberate choice to keep the project aligned with TypeScript 7's new type-stripping-first model, using `erasableSyntaxOnly` and `rewriteRelativeImportExtensions` to stay compatible.
 
@@ -92,6 +93,7 @@ All routes are prefixed with `/api/v1`.
 - Node.js 24+
 - pnpm
 - PostgreSQL (local or via Docker)
+- Neon
 
 ### Setup
 
