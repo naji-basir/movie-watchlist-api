@@ -1,86 +1,75 @@
 import type { Request, Response } from "express";
-import { prisma } from "../config/db.ts";
-import AppError from "../utils/AppError.ts";
 import catchAsync from "../utils/catchAsync.ts";
+import AppError from "../utils/AppError.ts";
+import { watchlistService } from "../services/watchlist.service.ts";
+import type { GetWatchlistQuery } from "../validation/watchlist.validation.ts";
 
 export const addToWatchlist = catchAsync(
   async (req: Request, res: Response) => {
-    const { movieId, status, rating, notes } = req.body;
+    if (!req.user) throw new AppError("Not authorized.", 401);
+    const item = await watchlistService.addToWatchlist(req.user.id, req.body);
+    res.status(201).json({ status: "success", data: item });
+  },
+);
 
-    if (!req.user) {
-      throw new AppError("Not authorized.", 401);
+export const getWatchlistItem = catchAsync(
+  async (req: Request, res: Response) => {
+    if (!req.user) throw new AppError("Not authorized.", 401);
+
+    const { id } = req.params;
+    if (typeof id !== "string") {
+      throw new AppError("Invalid ID.", 400);
     }
 
-    //varify movie
-    const movie = await prisma.movie.findUnique({ where: { id: movieId } });
+    const item = await watchlistService.getWatchlistItemForUser(
+      id,
+      req.user.id,
+    );
+    res.status(200).json({ status: "success", data: item });
+  },
+);
 
-    if (!movie) {
-      throw new AppError("Movie not found.", 404);
+export const getMyWatchlist = catchAsync(
+  async (req: Request, res: Response) => {
+    if (!req.user) throw new AppError("Not authorized.", 401);
+
+    const query = req.validated?.query as GetWatchlistQuery;
+    const { items, meta } = await watchlistService.getWatchlist(
+      req.user.id,
+      query,
+    );
+    res.status(200).json({ status: "success", data: items, meta });
+  },
+);
+
+export const updateWatchlistItem = catchAsync(
+  async (req: Request, res: Response) => {
+    if (!req.user) throw new AppError("Not authorized.", 401);
+
+    const { id } = req.params;
+    if (typeof id !== "string") {
+      throw new AppError("Invalid ID.", 400);
     }
 
-    //check if movie already exist in watchlist
-    const watchlist = await prisma.watchListItem.findUnique({
-      where: {
-        userId_movieId: {
-          userId: req.user.id,
-          movieId,
-        },
-      },
-    });
-
-    if (watchlist) {
-      throw new AppError("Movie alreay in watchlist.", 400);
-    }
-
-    // add to watchlist
-    const watchListItem = await prisma.watchListItem.create({
-      data: {
-        movieId,
-        userId: req.user.id,
-        status: status || "PLANNED",
-        rating,
-        notes,
-      },
-    });
-
-    res.status(201).json({ status: "success", data: watchListItem });
+    const item = await watchlistService.updateWatchlistItem(
+      id,
+      req.user.id,
+      req.body,
+    );
+    res.status(200).json({ status: "success", data: item });
   },
 );
 
 export const removeFromWatchlist = catchAsync(
   async (req: Request, res: Response) => {
-    const { id } = req.params;
+    if (!req.user) throw new AppError("Not authorized.", 401);
 
+    const { id } = req.params;
     if (typeof id !== "string") {
       throw new AppError("Invalid ID.", 400);
     }
 
-    if (!req.user) {
-      throw new AppError("Not authorized.", 401);
-    }
-
-    //check the movie exist in watchlist
-    const watchlist = await prisma.watchListItem.findUnique({
-      where: { id },
-    });
-
-    if (!watchlist) {
-      throw new AppError("Movie not exist in watchlist.", 404);
-    }
-
-    if (watchlist.userId !== req.user.id) {
-      throw new AppError(
-        "Not allowed to delete this movie from watchlist.",
-        403,
-      );
-    }
-
-    await prisma.watchListItem.delete({
-      where: { id },
-    });
-
-    return res
-      .status(204)
-      .json({ status: "success", message: "Movie deleted succussfuly." });
+    await watchlistService.removeFromWatchlist(id, req.user.id);
+    res.status(204).send();
   },
 );
