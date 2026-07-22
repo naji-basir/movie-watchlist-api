@@ -6,7 +6,7 @@ A REST API for tracking movies you want to watch, are watching, or have finished
 
 ## Why this project exists
 
-This isn't a tutorial clone — it started as a course project and was deliberately leveled up to demonstrate real engineering practices: layered architecture, input validation, role-based access control, and defensive error handling. Along the way it surfaced (and fixed) a genuine authorization bug, documented below, which was more valuable than any tutorial exercise.
+This isn't a tutorial clone — it started as a course project and was deliberately leveled up to demonstrate real engineering practices: layered architecture, input validation, role-based access control,rate limiting and defensive error handling. Along the way it surfaced (and fixed) a genuine authorization bug, documented below, which was more valuable than any tutorial exercise.
 
 ## Tech Stack
 
@@ -125,10 +125,11 @@ pnpm run start   # start without hot reload
 pnpm run lint    # lint with ESLint (TypeScript-aware)
 ```
 
+- **Rate limiting** — auth routes now have brute-force protection via a stricter auth limiter; additional per-user or IP-based throttling could still be useful for high-volume login endpoints.
+
 ## What I'd do differently at scale
 
 - **Refresh tokens** — current auth uses a single long-lived JWT; a production system should split short-lived access tokens from rotated refresh tokens.
-- **Rate limiting** — auth routes now have brute-force protection via a stricter auth limiter; additional per-user or IP-based throttling could still be useful for high-volume login endpoints.
 - **Caching** — the movie catalog is a natural candidate for a Redis-backed read cache, since it's public and changes infrequently.
 - **Structured logging** — `morgan` is fine for dev; a production deployment would benefit from structured JSON logs (e.g. `pino`) for real observability.
 - **Automated tests** — the layered architecture was built specifically to make this easy; test coverage is the current priority.
