@@ -2,24 +2,26 @@
 
 A REST API for tracking movies you want to watch, are watching, or have finished — built as a hands-on learning project to practice production-grade backend patterns with a modern TypeScript stack.
 
-> **Status:** actively developed. Auth, RBAC, validation, and core resources (movies, watchlist) are implemented. Tests, Docker, and deployment are in progress.
+> **Status:** actively developed. Auth, RBAC, validation, rate limiting, structured logging, and core resources (movies, watchlist) are implemented. Tests, Docker, and deployment are in progress.
 
 ## Why this project exists
 
-This isn't a tutorial clone — it started as a course project and was deliberately leveled up to demonstrate real engineering practices: layered architecture, input validation, role-based access control,rate limiting and defensive error handling. Along the way it surfaced (and fixed) a genuine authorization bug, documented below, which was more valuable than any tutorial exercise.
+This isn't a tutorial clone — it started as a course project and was deliberately leveled up to demonstrate real engineering practices: layered architecture, input validation, role-based access control, rate limiting, structured logging, and defensive error handling. Along the way it surfaced (and fixed) a genuine authorization bug, documented below, which was more valuable than any tutorial exercise.
 
 ## Tech Stack
 
-| Layer           | Choice                                                           |
-| --------------- | ---------------------------------------------------------------- |
-| Runtime         | Node.js 24, TypeScript 7 (native `tsx` execution, no build step) |
-| Framework       | Express 5                                                        |
-| Database        | PostgreSQL                                                       |
-| ORM             | Prisma 7                                                         |
-| Validation      | Zod 4                                                            |
-| Auth            | JWT (httpOnly cookies) + bcryptjs                                |
-| Package manager | pnpm                                                             |
-| Cloud           | Neon                                                             |
+| Layer           | Choice                                                                |
+| --------------- | --------------------------------------------------------------------- |
+| Runtime         | Node.js 24, TypeScript 7 (native `tsx` execution, no build step)      |
+| Framework       | Express 5                                                             |
+| Database        | PostgreSQL                                                            |
+| ORM             | Prisma 7                                                              |
+| Validation      | Zod 4                                                                 |
+| Auth            | JWT (httpOnly cookies) + bcryptjs                                     |
+| Rate limiting   | `express-rate-limit` (global + stricter auth-route limiter)           |
+| Logging         | `pino` + `pino-http` (structured JSON in prod, pretty-printed in dev) |
+| Package manager | pnpm                                                                  |
+| Cloud           | Neon                                                                  |
 
 **Why `noEmit: true`?** TypeScript is run directly via `tsx` (Node's native type-stripping in dev, and in prod alike) rather than pre-compiled — a deliberate choice to keep the project aligned with TypeScript 7's new type-stripping-first model, using `erasableSyntaxOnly` and `rewriteRelativeImportExtensions` to stay compatible.
 
@@ -28,7 +30,7 @@ This isn't a tutorial clone — it started as a course project and was deliberat
 Each resource follows a strict layered structure:
 
 ```
-Route → Middleware (authenticate, authorize, validate) → Controller → Service → Repository → Database
+Route → Middleware (authenticate, authorize, validate, rate limit) → Controller → Service → Repository → Database
 ```
 
 - **Routes** — wire up HTTP verbs, middleware, and controllers. No logic.
@@ -43,6 +45,8 @@ This separation means the ORM or the web framework could be swapped without touc
 - **Auth** — register/login/logout with JWT stored in an httpOnly cookie; passwords hashed with bcrypt
 - **RBAC** — `USER` / `ADMIN` roles via a Prisma enum, enforced with `authenticate` + `authorize` middleware
 - **Validation** — every request body/query/params validated with Zod 4 (`strictObject`, coercion, custom refinements) before it reaches a controller
+- **Rate limiting** — a global limiter on all routes, plus a stricter limiter on auth routes (`skipSuccessfulRequests`) to slow down brute-force login/register attempts
+- **Structured logging** — every request logged via `pino-http` with request IDs, response times, and log levels tied to status code (`info` for 2xx/3xx, `warn` for 4xx, `error` for 5xx); sensitive fields (cookies, auth headers, passwords) are redacted from logs
 - **Movies** — admin-curated catalog; public reads, admin-only writes; unique on `(title, releaseYear)` to allow legitimate remakes while blocking true duplicates
 - **Watchlist** — personal, per-user list of movies with status (`PLANNED` / `WATCHING` / `COMPLETED` / `DROPPED`), rating, and notes
 - **Pagination, sorting, filtering** — on both list endpoints (`page`, `limit`, `sortBy`, `order`, plus resource-specific filters like `genre`, `status`, `search`)
@@ -125,13 +129,12 @@ pnpm run start   # start without hot reload
 pnpm run lint    # lint with ESLint (TypeScript-aware)
 ```
 
-- **Rate limiting** — auth routes now have brute-force protection via a stricter auth limiter; additional per-user or IP-based throttling could still be useful for high-volume login endpoints.
-
 ## What I'd do differently at scale
 
 - **Refresh tokens** — current auth uses a single long-lived JWT; a production system should split short-lived access tokens from rotated refresh tokens.
 - **Caching** — the movie catalog is a natural candidate for a Redis-backed read cache, since it's public and changes infrequently.
-- **Structured logging** — `morgan` is fine for dev; a production deployment would benefit from structured JSON logs (e.g. `pino`) for real observability.
+- **Distributed rate limiting** — the current limiter uses in-memory storage, fine for a single instance; a multi-instance deployment would need a shared store (e.g. `rate-limit-redis`).
+- **Log shipping** — logs are currently console-only; a production deployment would benefit from shipping structured JSON logs to an aggregator (e.g. Loki, Datadog, CloudWatch).
 - **Automated tests** — the layered architecture was built specifically to make this easy; test coverage is the current priority.
 
 ## License
