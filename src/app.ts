@@ -31,6 +31,9 @@ if (process.env.NODE_ENV === "development") {
 }
 
 // --- Routes ---
+app.get("/health", (req: Request, res: Response) => {
+  res.status(200).json({ message: "Hello, World!" });
+});
 app.use("/api/v1/movies", movieRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/watchlist", watchlistRoutes);
