@@ -5,7 +5,7 @@ import type {
   CreateMovieInput,
   GetMoviesQuery,
   UpdateMovieInput,
-} from "../validation/movie.validation.ts";
+} from "../validations/movie.validation.ts";
 
 export const movieService = {
   async createMovie(userId: string, input: CreateMovieInput) {

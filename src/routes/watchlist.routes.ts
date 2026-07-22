@@ -1,13 +1,13 @@
 import { Router } from "express";
-import { authenticate } from "../middleware/authenticate.ts";
-import { validate } from "../middleware/validate.js";
+import { authenticate } from "../middlewares/authenticate.ts";
+import { validate } from "../middlewares/validate.js";
 
 import {
   addToWatchlistSchema,
   updateWatchlistItemSchema,
   watchlistItemIdParamSchema,
   getWatchlistQuerySchema,
-} from "../validation/watchlist.validation.ts";
+} from "../validations/watchlist.validation.ts";
 
 import {
   addToWatchlist,

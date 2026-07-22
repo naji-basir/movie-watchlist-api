@@ -1,14 +1,14 @@
 import { Router } from "express";
-import { authenticate } from "../middleware/authenticate.ts";
-import { authorize } from "../middleware/authorize.ts";
-import { validate } from "../middleware/validate.ts";
+import { authenticate } from "../middlewares/authenticate.ts";
+import { authorize } from "../middlewares/authorize.ts";
+import { validate } from "../middlewares/validate.ts";
 
 import {
   createMovieSchema,
   updateMovieSchema,
   movieIdParamSchema,
   getMoviesQuerySchema,
-} from "../validation/movie.validation.ts";
+} from "../validations/movie.validation.ts";
 
 import {
   createMovie,

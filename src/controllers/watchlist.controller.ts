@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 import catchAsync from "../utils/catchAsync.ts";
 import AppError from "../utils/AppError.ts";
 import { watchlistService } from "../services/watchlist.service.ts";
-import type { GetWatchlistQuery } from "../validation/watchlist.validation.ts";
+import type { GetWatchlistQuery } from "../validations/watchlist.validation.ts";
 
 export const addToWatchlist = catchAsync(
   async (req: Request, res: Response) => {

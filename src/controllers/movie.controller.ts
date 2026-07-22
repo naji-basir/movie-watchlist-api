@@ -3,7 +3,7 @@ import type { Request } from "express";
 import catchAsync from "../utils/catchAsync.ts";
 import AppError from "../utils/AppError.ts";
 import { movieService } from "../services/movie.service.ts";
-import type { GetMoviesQuery } from "../validation/movie.validation.ts";
+import type { GetMoviesQuery } from "../validations/movie.validation.ts";
 
 export const createMovie = catchAsync(async (req: Request, res: Response) => {
   if (!req.user) {

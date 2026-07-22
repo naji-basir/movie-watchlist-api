@@ -1,5 +1,5 @@
 import { prisma } from "../config/db.ts";
-import type { RegisterInput } from "../validation/user.validation.ts";
+import type { RegisterInput } from "../validations/user.validation.ts";
 
 export const userRepository = {
   findByEmail: async (email: string) => {

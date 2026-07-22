@@ -5,7 +5,7 @@ import type {
   AddToWatchlistInput,
   UpdateWatchlistItemInput,
   GetWatchlistQuery,
-} from "../validation/watchlist.validation.ts";
+} from "../validations/watchlist.validation.ts";
 import type { Prisma, Role } from "../generated/prisma/client.ts";
 
 export const watchlistService = {
