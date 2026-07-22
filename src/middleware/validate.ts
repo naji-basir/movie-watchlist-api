@@ -18,5 +18,17 @@ export const validate =
       throw new AppError(message, 400);
     }
 
+    const parsed = result.data as {
+      body?: unknown;
+      query?: unknown;
+      params?: unknown;
+    };
+
+    if (parsed.body !== undefined) req.body = parsed.body;
+    if (parsed.query !== undefined)
+      req.validated = { ...req.validated, query: parsed.query };
+    if (parsed.params !== undefined)
+      req.validated = { ...req.validated, params: parsed.params };
+
     next();
   };

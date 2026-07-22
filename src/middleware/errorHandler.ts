@@ -5,7 +5,7 @@ import type {
   ErrorRequestHandler,
 } from "express";
 
-import AppError from "../utils/AppError.js";
+import AppError from "../utils/AppError.ts";
 import { Prisma } from "../generated/prisma/client.ts";
 
 const handlePrismaKnownError = (

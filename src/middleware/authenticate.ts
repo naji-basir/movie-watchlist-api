@@ -4,7 +4,7 @@ import AppError from "../utils/AppError.ts";
 import catchAsync from "../utils/catchAsync.ts";
 import jwt, { type JwtPayload } from "jsonwebtoken";
 
-export const authMiddleware = catchAsync(
+export const authenticate = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     let token: string | undefined;
 
