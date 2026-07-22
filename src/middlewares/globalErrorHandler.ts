@@ -1,23 +1,21 @@
 import type {
+  ErrorRequestHandler,
+  NextFunction,
   Request,
   Response,
-  NextFunction,
-  ErrorRequestHandler,
 } from "express";
 
-import AppError from "../utils/AppError.ts";
 import { Prisma } from "../generated/prisma/client.ts";
+import AppError from "../utils/AppError.ts";
 
 const handlePrismaKnownError = (
   err: Prisma.PrismaClientKnownRequestError,
 ): AppError => {
-  // Unique constraint violation (e.g. duplicate email)
   if (err.code === "P2002") {
     const target = err.meta?.target as string[] | undefined;
     const field = target?.[0] || "field";
     return new AppError(`${field} already exists.`, 409);
   }
-  // Record not found
   if (err.code === "P2025") {
     return new AppError("Resource not found.", 404);
   }
@@ -46,8 +44,6 @@ const sendErrorProd = (err: AppError, res: Response): Response => {
       message: err.message,
     });
   }
-  // Unexpected/programming error — don't leak details
-  console.error("UNEXPECTED ERROR:", err);
   return res.status(500).json({
     status: "error",
     message: "Something went wrong.",
@@ -72,6 +68,14 @@ const globalErrorHandler: ErrorRequestHandler = (
     error = err;
   } else {
     error = new AppError(err.message || "Something went wrong.", 500);
+  }
+
+  const logPayload = { err: error, path: req.path, method: req.method };
+
+  if (error.isOperational) {
+    req.log?.warn(logPayload, error.message);
+  } else {
+    req.log?.error(logPayload, "UNEXPECTED ERROR");
   }
 
   if (process.env.NODE_ENV === "development") {
