@@ -1,5 +1,5 @@
 import { config } from "dotenv";
-config(); // Must run before any other import touches process.env
+config(); // Must run before any oth  er import touches process.env
 import express, {
   type Express,
   type NextFunction,
@@ -7,30 +7,28 @@ import express, {
   type Response,
 } from "express";
 
+import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import { connectDB, disconnectDB } from "./config/db.ts";
-import morgan from "morgan";
-import cookieParser from "cookie-parser";
 import globalErrorHandler from "./middlewares/globalErrorHandler.ts";
 import authRoutes from "./routes/auth.routes.ts";
 import movieRoutes from "./routes/movie.routes.ts";
 import watchlistRoutes from "./routes/watchlist.routes.ts";
 
-import AppError from "./utils/AppError.ts";
 import { globalLimiter } from "./middlewares/rateLimiter.ts";
+import AppError from "./utils/AppError.ts";
+import { httpLogger } from "./middlewares/httpLogger.ts";
+import { logger } from "./utils/logger.ts";
 
 const app: Express = express();
 
 // --- Global middleware ---
-app.use(helmet()); // sets secure HTTP headers (XSS, sniffing, etc.)
-app.use(express.json({ limit: "10kb" })); // parses JSON request bodies
-app.use(express.urlencoded({ extended: true, limit: "10kb" })); // parses form-encoded bodies
-app.use(cookieParser()); // populates req.cookies, needed to read the jwt cookie in auth middleware
-app.use(globalLimiter); // rate limiting
-
-if (process.env.NODE_ENV === "development") {
-  app.use(morgan("tiny"));
-}
+app.use(helmet());
+app.use(express.json({ limit: "10kb" }));
+app.use(express.urlencoded({ extended: true, limit: "10kb" }));
+app.use(cookieParser());
+app.use(globalLimiter);
+app.use(httpLogger);
 
 // --- Routes ---
 app.get("/health", (req: Request, res: Response) => {
@@ -40,7 +38,6 @@ app.use("/api/v1/movies", movieRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/watchlist", watchlistRoutes);
 
-// Catches any request that didn't match a route above.
 app.use((req: Request, res: Response, next: NextFunction) => {
   next(new AppError(`Route ${req.originalUrl} not found.`, 404));
 });
@@ -54,23 +51,22 @@ async function startServer() {
   try {
     await connectDB();
     server = app.listen(PORT, () => {
-      console.log(`Server running on PORT ${PORT}.`);
+      logger.info(`Server running on PORT ${PORT}.`);
     });
   } catch (err) {
-    console.error("Failed to start server:", err);
+    logger.error(err, "Failed to start server");
     await disconnectDB();
     process.exit(1);
   }
 }
 
-// Closes the HTTP server (letting in-flight requests finish) before closing the DB and exiting, rather than killing the process immediately.
-async function shutdown(signal: any) {
-  console.log(`\n${signal} received. Shutting down gracefully...`);
+async function shutdown(signal: string) {
+  logger.info(`${signal} received. Shutting down gracefully...`);
   if (server) {
     server.close(async () => {
-      console.log("HTTP server closed.");
+      logger.info("HTTP server closed.");
       await disconnectDB();
-      console.log("DB connection closed.");
+      logger.info("DB connection closed.");
       process.exit(0);
     });
   } else {
@@ -79,11 +75,11 @@ async function shutdown(signal: any) {
   }
 }
 
-process.on("SIGINT", () => shutdown("SIGINT")); // Ctrl+C locally
-process.on("SIGTERM", () => shutdown("SIGTERM")); // sent by Docker/Kubernetes/hosting platforms on stop
+process.on("SIGINT", () => shutdown("SIGINT"));
+process.on("SIGTERM", () => shutdown("SIGTERM"));
 
 process.on("unhandledRejection", (reason) => {
-  console.error("Unhandled Rejection:", reason);
+  logger.error(reason, "Unhandled Rejection");
   if (server) {
     server.close(() => process.exit(1));
   } else {
@@ -92,7 +88,7 @@ process.on("unhandledRejection", (reason) => {
 });
 
 process.on("uncaughtException", (err) => {
-  console.error("Uncaught Exception:", err);
+  logger.error(err, "Uncaught Exception");
   if (server) {
     server.close(() => process.exit(1));
   } else {
