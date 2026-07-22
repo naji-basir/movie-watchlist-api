@@ -11,12 +11,13 @@ import helmet from "helmet";
 import { connectDB, disconnectDB } from "./config/db.ts";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
-import globalErrorHandler from "./middleware/errorHandler.ts";
+import globalErrorHandler from "./middlewares/globalErrorHandler.ts";
 import authRoutes from "./routes/auth.routes.ts";
 import movieRoutes from "./routes/movie.routes.ts";
 import watchlistRoutes from "./routes/watchlist.routes.ts";
 
 import AppError from "./utils/AppError.ts";
+import { globalLimiter } from "./middlewares/rateLimiter.ts";
 
 const app: Express = express();
 
@@ -25,6 +26,7 @@ app.use(helmet()); // sets secure HTTP headers (XSS, sniffing, etc.)
 app.use(express.json({ limit: "10kb" })); // parses JSON request bodies
 app.use(express.urlencoded({ extended: true, limit: "10kb" })); // parses form-encoded bodies
 app.use(cookieParser()); // populates req.cookies, needed to read the jwt cookie in auth middleware
+app.use(globalLimiter); // rate limiting
 
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("tiny"));
