@@ -1,7 +1,7 @@
 import "dotenv/config"; // must be the very first line in this file
 
-import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaNeon } from "@prisma/adapter-neon";
+import { PrismaClient } from "../src/generated/prisma/client";
 
 const adapter = new PrismaNeon({
   connectionString: process.env.DATABASE_URL,
