@@ -19,7 +19,7 @@ This isn't a tutorial clone — it started as a course project and was deliberat
 | Validation      | Zod 4                                                            |
 | Auth            | JWT (httpOnly cookies) + bcryptjs                                |
 | Package manager | pnpm                                                             |
-|Cloud            | Neon                                                             |
+| Cloud           | Neon                                                             |
 
 **Why `noEmit: true`?** TypeScript is run directly via `tsx` (Node's native type-stripping in dev, and in prod alike) rather than pre-compiled — a deliberate choice to keep the project aligned with TypeScript 7's new type-stripping-first model, using `erasableSyntaxOnly` and `rewriteRelativeImportExtensions` to stay compatible.
 
@@ -128,7 +128,7 @@ pnpm run lint    # lint with ESLint (TypeScript-aware)
 ## What I'd do differently at scale
 
 - **Refresh tokens** — current auth uses a single long-lived JWT; a production system should split short-lived access tokens from rotated refresh tokens.
-- **Rate limiting** — not yet applied to auth routes; needed to slow brute-force attempts.
+- **Rate limiting** — auth routes now have brute-force protection via a stricter auth limiter; additional per-user or IP-based throttling could still be useful for high-volume login endpoints.
 - **Caching** — the movie catalog is a natural candidate for a Redis-backed read cache, since it's public and changes infrequently.
 - **Structured logging** — `morgan` is fine for dev; a production deployment would benefit from structured JSON logs (e.g. `pino`) for real observability.
 - **Automated tests** — the layered architecture was built specifically to make this easy; test coverage is the current priority.
