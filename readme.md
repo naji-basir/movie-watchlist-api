@@ -27,7 +27,7 @@ This isn't a tutorial clone — it started as a course project and was deliberat
 Each resource follows a strict layered structure:
 
 ```
-Route → Middleware (auth, validate) → Controller → Service → Repository → Database
+Route → Middleware (authenticate, authorize, validate) → Controller → Service → Repository → Database
 ```
 
 - **Routes** — wire up HTTP verbs, middleware, and controllers. No logic.
