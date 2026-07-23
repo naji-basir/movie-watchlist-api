@@ -6,7 +6,7 @@ A REST API for tracking movies you want to watch, are watching, or have finished
 
 ## Why this project exists
 
-This isn't a tutorial clone — it started as a course project and was deliberately leveled up to demonstrate real engineering practices: layered architecture, input validation, role-based access control, rate limiting, structured logging, OpenAPI documentation, and defensive error handling. Along the way it surfaced (and fixed) a genuine authorization bug, documented below, which was more valuable than any tutorial exercise.
+The main gola to developing this project is to demonstrate real engineering practices: layered architecture, input validation, role-based access control, rate limiting, structured logging, OpenAPI documentation, and defensive error handling. Along the way it surfaced (and fixed) a genuine authorization bug, documented below, which was more valuable than any tutorial exercise.
 
 ## Tech Stack
 
