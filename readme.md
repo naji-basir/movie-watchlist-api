@@ -281,7 +281,7 @@ All routes are prefixed with `/api/v1`.
 ### Setup
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/naji-basir/movie-watchlist-api.git
 cd backend-course
 pnpm install
 cp .env.example .env   # fill in DATABASE_URL, JWT_SECRET, etc.
@@ -299,7 +299,7 @@ DATABASE_URL=
 JWT_SECRET=
 JWT_EXPIRES_IN=7d
 NODE_ENV=development
-PORT=5002
+PORT=
 ```
 
 ### Scripts
