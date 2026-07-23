@@ -19,6 +19,8 @@ import { globalLimiter } from "./middlewares/rateLimiter.ts";
 import AppError from "./utils/AppError.ts";
 import { httpLogger } from "./middlewares/httpLogger.ts";
 import { logger } from "./utils/logger.ts";
+import swaggerUi from "swagger-ui-express";
+import { openApiDocument } from "./docs/openapi.ts";
 
 const app: Express = express();
 
@@ -29,6 +31,9 @@ app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 app.use(cookieParser());
 app.use(globalLimiter);
 app.use(httpLogger);
+
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(openApiDocument));
+app.get("/openapi.json", (_req, res) => res.json(openApiDocument));
 
 // --- Routes ---
 app.get("/health", (req: Request, res: Response) => {
