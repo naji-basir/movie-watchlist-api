@@ -1,13 +1,13 @@
 {
-  "name": "backend-course",
+  "name": "movie-watchlist-api",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --exec tsx src/app.ts",
+    "dev": "nodemon --exec tsx src/index.ts",
     "build": "tsc",
-    "start": "node dist/app.js",
+    "start": "node dist/index.js",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix"
   },
