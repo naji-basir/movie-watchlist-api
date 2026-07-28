@@ -1,0 +1,317 @@
+{
+  "info": {
+    "_postman_id": "fc0a992e-9a83-4a3d-80e4-f44fe2b5dd4f",
+    "name": "Movie Watchlist API",
+    "description": "# Movie Watchlist API\n\nA RESTful API for managing a personal movie watchlist. This API allows users to register and authenticate, browse and manage movies, and maintain a personal watchlist with watch status, ratings, and notes.\n\n## Base URL\n\nAll endpoints use the `{{BaseURL}}` variable. Make sure to set this in your active environment before sending requests.\n\n## Authentication\n\nMost endpoints require a valid JWT. After logging in, the token is automatically managed via vault variables. Ensure you are logged in before accessing protected routes.\n\n## Folders\n\n- **Auth** — User registration, login, and logout\n    \n- **Movies** — Browse, create, update, and delete movies\n    \n- **Watchlist** — Manage your personal watchlist entries",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "49737651",
+    "_collection_link": "https://go.postman.co/collection/49737651-fc0a992e-9a83-4a3d-80e4-f44fe2b5dd4f?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Mahmood\",\r\n    \"email\": \"mahmood@gmail.com\",\r\n    \"password\": \"mahmood1234\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BaseURL}}/auth/register",
+              "host": ["{{BaseURL}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Create a new user account.\n\n**Request Body (JSON):**\n| Field | Type | Required | Description |\n|-------|------|----------|-------------|\n| name | string | Yes | The user's display name |\n| email | string | Yes | A unique email address |\n| password | string | Yes | Account password |\n\n**Example Request Body:**\n```json\n{\n  \"name\": \"Qasem\",\n  \"email\": \"qasem@gmail.com\",\n  \"password\": \"qasem1234\"\n}\n```\n\n**Responses:**\n- `201 Created` — Account created successfully\n- `400 Bad Request` — Validation error or email already in use"
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"mahmood@gmail.com\",\r\n    \"password\": \"mahmood1234\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BaseURL}}/auth/login",
+              "host": ["{{BaseURL}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Authenticate a user and start a session.\n\n**Request Body (JSON):**\n| Field | Type | Required | Description |\n|-------|------|----------|-------------|\n| email | string | Yes | Registered email address |\n| password | string | Yes | Account password |\n\n**Example Request Body:**\n```json\n{\n  \"email\": \"basir@gmail.com\",\n  \"password\": \"basir1234\"\n}\n```\n\n**Responses:**\n- `200 OK` — Login successful, returns a JWT token\n- `401 Unauthorized` — Invalid credentials"
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\":\"basir@gmail.com\",\r\n    \"password\": 123\r\n}"
+            },
+            "url": {
+              "raw": "{{BaseURL}}/auth/logout",
+              "host": ["{{BaseURL}}"],
+              "path": ["auth", "logout"]
+            },
+            "description": "Invalidate the current user session.\n\nNo request body is required. The session token is read from the Authorization header or cookie.\n\n**Responses:**\n- `200 OK` — Logged out successfully\n- `401 Unauthorized` — No active session found"
+          },
+          "response": []
+        }
+      ],
+      "description": "## Auth\n\nHandles user authentication and session management.\n\n- **Register** — Create a new user account with a name, email, and password.\n- **Login** — Authenticate with email and password to receive a JWT session token.\n- **Logout** — Invalidate the current session token.\n\n> All subsequent requests to protected endpoints require a valid session established via Login."
+    },
+    {
+      "name": "movies",
+      "item": [
+        {
+          "name": "Get All Movies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BaseURL}}/movies",
+              "host": ["{{BaseURL}}"],
+              "path": ["movies"]
+            },
+            "description": "Retrieve a list of all movies in the catalog.\n\n**Query Parameters:**\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| search | string | No | Filter movies by title keyword |\n\n**Example:** `GET {{BaseURL}}/movies?search=GOT`\n\n**Responses:**\n- `200 OK` — Returns an array of movie objects"
+          },
+          "response": []
+        },
+        {
+          "name": "Get  Movie",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BaseURL}}/movies/dd8901ab-bde4-477f-a07d-ffd1f8ef5236",
+              "host": ["{{BaseURL}}"],
+              "path": ["movies", "dd8901ab-bde4-477f-a07d-ffd1f8ef5236"]
+            },
+            "description": "Retrieve details of a single movie by its UUID.\n\n**Path Parameter:**\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| id | UUID | Yes | The unique identifier of the movie |\n\n**Example:** `GET {{BaseURL}}/movies/dd8901ab-bde4-477f-a07d-ffd1f8ef5236`\n\n**Responses:**\n- `200 OK` — Returns the movie object\n- `404 Not Found` — Movie with the given ID does not exist"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Movie",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"title\": \"GOT SO2\",\r\n    \"overview\": \"Game of thrones war of 7 kingdom.\",\r\n    \"releaseYear\": 2013,\r\n    \"runtime\": 15400,\r\n    \"posterUrl\": \"https://got.jpg\",\r\n    \"genres\": [\r\n        \"Drama\"\r\n    ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BaseURL}}/movies/b3432dc6-7307-4700-a78f-b7db8a78a885",
+              "host": ["{{BaseURL}}"],
+              "path": ["movies", "b3432dc6-7307-4700-a78f-b7db8a78a885"]
+            },
+            "description": "Partially update an existing movie's details. Requires authentication.\n\n**Path Parameter:**\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| id | UUID | Yes | The unique identifier of the movie to update |\n\n**Request Body (JSON) — all fields optional:**\n| Field | Type | Description |\n|-------|------|-------------|\n| title | string | Updated movie title |\n| overview | string | Updated synopsis |\n| releaseYear | number | Updated release year |\n| runtime | number | Updated runtime in seconds |\n| posterUrl | string | Updated poster URL |\n| genres | string[] | Updated genre list |\n\n**Responses:**\n- `200 OK` — Movie updated successfully\n- `404 Not Found` — Movie not found\n- `401 Unauthorized` — Authentication required"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Movie",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"title\": \"GOT SO3\",\r\n    \"overview\": \"Game of thrones war of 7 kingdom.\",\r\n    \"releaseYear\": 2014,\r\n    \"runtime\": 15400,\r\n    \"posterUrl\": \"https://got.jpg\",\r\n    \"genres\": [\r\n        \"Drama\"\r\n    ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BaseURL}}/movies",
+              "host": ["{{BaseURL}}"],
+              "path": ["movies"]
+            },
+            "description": "Add a new movie to the catalog. Requires authentication.\n\n**Request Body (JSON):**\n| Field | Type | Required | Description |\n|-------|------|----------|-------------|\n| title | string | Yes | Movie title |\n| overview | string | Yes | Short description or synopsis |\n| releaseYear | number | Yes | Year the movie was released |\n| runtime | number | Yes | Runtime in seconds |\n| posterUrl | string | No | URL to the movie poster image |\n| genres | string[] | No | List of genre labels (e.g. \"Drama\", \"Action\") |\n\n**Example Request Body:**\n```json\n{\n  \"title\": \"GOT SO3\",\n  \"overview\": \"Game of thrones war of 7 kingdom.\",\n  \"releaseYear\": 2014,\n  \"runtime\": 15400,\n  \"posterUrl\": \"https://got.jpg\",\n  \"genres\": [\"Drama\"]\n}\n```\n\n**Responses:**\n- `201 Created` — Movie created successfully\n- `400 Bad Request` — Validation error\n- `401 Unauthorized` — Authentication required"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Movie",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{BaseURL}}/movies/88e8a272-d8fd-4a6b-b806-cd7e03dd7979",
+              "host": ["{{BaseURL}}"],
+              "path": ["movies", "88e8a272-d8fd-4a6b-b806-cd7e03dd7979"]
+            },
+            "description": "Remove a movie from the catalog. Requires authentication.\n\n**Path Parameter:**\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| id | UUID | Yes | The unique identifier of the movie to delete |\n\n**Example:** `DELETE {{BaseURL}}/movies/88e8a272-d8fd-4a6b-b806-cd7e03dd7979`\n\n**Responses:**\n- `200 OK` — Movie deleted successfully\n- `404 Not Found` — Movie not found\n- `401 Unauthorized` — Authentication required"
+          },
+          "response": []
+        }
+      ],
+      "description": "## Movies\n\nEndpoints for browsing and managing the movie catalog.\n\n- **Get All Movies** — Retrieve a paginated list of movies. Supports a `search` query parameter to filter by title.\n- **Get Movie** — Fetch details of a single movie by its UUID.\n- **Create Movie** — Add a new movie to the catalog (title, overview, release year, runtime, poster URL, genres).\n- **Update Movie** — Partially update an existing movie's details by its UUID.\n- **Delete Movie** — Remove a movie from the catalog by its UUID.\n\n> Requires authentication for write operations (Create, Update, Delete)."
+    },
+    {
+      "name": "Watchlist",
+      "item": [
+        {
+          "name": "Add Watchlist Item",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"movieId\": \"bd28c92d-ff27-4a4b-92d1-3d20c5894ddc\",\r\n    \"status\": \"PLANNED\",\r\n    \"rating\": 4,\r\n    \"notes\": \"qasem\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BaseURL}}/watchlist",
+              "host": ["{{BaseURL}}"],
+              "path": ["watchlist"]
+            },
+            "description": "Add a movie to the authenticated user's watchlist. Requires authentication.\n\n**Request Body (JSON):**\n| Field | Type | Required | Description |\n|-------|------|----------|-------------|\n| movieId | UUID | Yes | The ID of the movie to add |\n| status | string | Yes | Watch status: `PLANNED`, `WATCHING`, or `COMPLETED` |\n| rating | number | No | User rating (e.g. 1–10) |\n| notes | string | No | Personal notes about the movie |\n\n**Example Request Body:**\n```json\n{\n  \"movieId\": \"f957c964-551f-417e-9804-d62815542e51\",\n  \"status\": \"PLANNED\",\n  \"rating\": 8,\n  \"notes\": \"2000 best movie of the year.\"\n}\n```\n\n**Responses:**\n- `201 Created` — Watchlist item added\n- `400 Bad Request` — Validation error or movie already in watchlist\n- `401 Unauthorized` — Authentication required"
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Watclhis Item",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{BaseURL}}/watchlist/8fc055da-85ae-4857-a119-2b94b7b19ef5",
+              "host": ["{{BaseURL}}"],
+              "path": ["watchlist", "8fc055da-85ae-4857-a119-2b94b7b19ef5"]
+            },
+            "description": "Remove an entry from the authenticated user's watchlist. Requires authentication.\n\n**Path Parameter:**\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| id | UUID | Yes | The unique identifier of the watchlist entry to remove |\n\n**Example:** `DELETE {{BaseURL}}/watchlist/b0724bfd-30e5-420d-a519-97f2931a6a41`\n\n**Responses:**\n- `200 OK` — Watchlist item removed\n- `404 Not Found` — Entry not found\n- `401 Unauthorized` — Authentication required"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Watchlist iItem",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"movieId\": \"b3432dc6-7307-4700-a78f-b7db8a78a885\",\r\n    \"status\": \"PLANNED\",\r\n    \"rating\": 9,\r\n    \"notes\": \"2000 best movie of the year.\"\r\n}"
+            },
+            "url": {
+              "raw": "{{BaseURL}}/watchlist",
+              "host": ["{{BaseURL}}"],
+              "path": ["watchlist"]
+            },
+            "description": "Retrieve all watchlist entries for the currently authenticated user. Requires authentication.\n\n**Responses:**\n- `200 OK` — Returns an array of watchlist entries, each containing movie details, status, rating, and notes\n- `401 Unauthorized` — Authentication required"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Watchlist Item",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"status\": \"COMPLETED\",\r\n  \"rating\": 9,\r\n  \"notes\": \" edit by ali\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BaseURL}}/watchlist/1e7a78b9-9ec4-48cc-809a-e8745a32960c",
+              "host": ["{{BaseURL}}"],
+              "path": ["watchlist", "1e7a78b9-9ec4-48cc-809a-e8745a32960c"]
+            },
+            "description": "Update an existing watchlist entry. Requires authentication.\n\n**Path Parameter:**\n| Parameter | Type | Required | Description |\n|-----------|------|----------|-------------|\n| id | UUID | Yes | The unique identifier of the watchlist entry |\n\n**Request Body (JSON) — all fields optional:**\n| Field | Type | Description |\n|-------|------|-------------|\n| status | string | Updated watch status: `PLANNED`, `WATCHING`, or `COMPLETED` |\n| rating | number | Updated rating |\n| notes | string | Updated personal notes |\n\n**Example Request Body:**\n```json\n{\n  \"status\": \"COMPLETED\",\n  \"rating\": 9,\n  \"notes\": \"edit by basir\"\n}\n```\n\n**Responses:**\n- `200 OK` — Watchlist item updated\n- `404 Not Found` — Entry not found\n- `401 Unauthorized` — Authentication required"
+          },
+          "response": []
+        }
+      ],
+      "description": "## Watchlist\n\nManage the authenticated user's personal movie watchlist.\n\n- **Add Watchlist Item** — Add a movie to your watchlist with an initial status (`PLANNED`, `WATCHING`, `COMPLETED`), optional rating, and notes.\n- **Get Watchlist Item** — Retrieve all watchlist entries for the current user.\n- **Update Watchlist Item** — Update the status, rating, or notes of an existing watchlist entry by its UUID.\n- **Remove Watchlist Item** — Delete a watchlist entry by its UUID.\n\n> All watchlist endpoints require authentication."
+    },
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5002/health",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5002",
+          "path": ["health"]
+        },
+        "description": "Check the health status of the API server.\n\nThis endpoint does not require authentication and can be used to verify that the server is running and reachable.\n\n**Responses:**\n- `200 OK` — Server is healthy and running"
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "BaseURL",
+      "value": ""
+    },
+    {
+      "key": "json_web_token_0lqz",
+      "secret": true
+    },
+    {
+      "key": "auth_secret_06nr",
+      "secret": true
+    },
+    {
+      "key": "supabase_service_role_api_key_0n2h",
+      "secret": true
+    }
+  ]
+}
