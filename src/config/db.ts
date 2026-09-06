@@ -1,5 +1,8 @@
 import "dotenv/config"; // must be the very first line in this file
+import { neonConfig } from "@neondatabase/serverless";
+import ws from "ws";
 
+neonConfig.webSocketConstructor = ws;
 // import { PrismaClient } from "../generated/prisma/client";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "../generated/prisma/client.ts";
